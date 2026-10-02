@@ -1,0 +1,44 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authentication
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker asia-northeast1-docker.pkg.dev --quiet
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t asia-northeast1-docker.pkg.dev/github-actions-practice-f9455c/cloud-run-practice/python-test-cloud-run-api:${{ github.sha }} \
+            .
+
+      - name: Push Docker image
+        run: |
+          docker push asia-northeast1-docker.pkg.dev/github-actions-practice-f9455c/cloud-run-practice/python-test-cloud-run-api:${{ github.sha }}
+
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: python-test-cloud-run-api
+          region: asia-northeast1
+          image: asia-northeast1-docker.pkg.dev/github-actions-practice-f9455c/cloud-run-practice/python-test-cloud-run-api:${{ github.sha }}

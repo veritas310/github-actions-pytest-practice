@@ -1,0 +1,45 @@
+name: test
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    env:
+      DB_USER: postgres
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run pytest
+        run: pytest
+
+      - name: Run only on failure
+        if: failure()
+        run: echo "Test failed"
+
+      - name: Print DB_USER
+        run: echo "DB_USER -> ${DB_USER}"
+
+      - name: Print secret
+        run: echo "SECRET -> ${{ secrets.SUPU_API_KEY }}"
+
+      - name: Get Time
+        id: get-time
+        run: echo "time=$(date)" >> $GITHUB_OUTPUT
+
+      - name: Print GitHub Output
+        run: echo "前のStepの出力は ${{ steps.get-time.outputs.time }} です"
