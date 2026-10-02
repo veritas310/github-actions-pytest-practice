@@ -29,3 +29,6 @@ jobs:
 
       - name: Print DB_USER
         run: echo "DB_USER -> ${DB_USER}"
+
+      - name: Print secret
+        run: echo "SECRET -> ${{ secrets.SUPU_API_KEY }}"
