@@ -36,3 +36,10 @@ jobs:
 
       - name: Print secret
         run: echo "SECRET -> ${{ secrets.SUPU_API_KEY }}"
+
+      - name: Get Time
+        id: get-time
+        run: echo "time=$(date)" >> $GITHUB_OUTPUT
+
+      - name: Print GitHub Output
+        run: echo "前のStepの出力は ${{ steps.get-time.outputs.time }} です"
